@@ -1,0 +1,122 @@
+{
+  "name": "Upload files",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "uploadFile",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f2e18fc9-d8f3-43d9-89d1-a6c9f29b5061",
+      "name": "Webhook",
+      "webhookId": "f8b879eb-c16a-4540-972d-849a3f8db038"
+    },
+    {
+      "parameters": {
+        "name": "={{ \"Input_\" +  $now.format(\"yyyyMMddHHmmss\") + \".csv\"}} ",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1BBcANgsretMlMzOAmz6AY4sVJyes_E3V",
+          "mode": "list",
+          "cachedResultName": "AmazonData",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1BBcANgsretMlMzOAmz6AY4sVJyes_E3V"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8de22751-d7d3-4081-b9d2-f60af3386fd4",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "enableResponseOutput": true,
+        "respondWith": "json",
+        "responseBody": "{\n  \"Result\": \"File uploaded.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "56b361de-95a5-4394-b665-1dbb173bca8d",
+      "name": "Respond to Webhook",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "MaSmQKoNR0RV74x3",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "d8c71c1b-39b2-4a27-8082-070b248cc84e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7e5f6e071db1c4ac57b4aa2f0b02f457c474b16d1a5999afaa804ba672aaab9"
+  },
+  "id": "2y0eDWNdl8CDXj7K",
+  "tags": [
+    {
+      "updatedAt": "2026-03-08T12:02:20.079Z",
+      "createdAt": "2026-03-08T12:02:20.079Z",
+      "id": "FZNCYty4Cb1cYWia",
+      "name": "Input webhook"
+    }
+  ]
+}

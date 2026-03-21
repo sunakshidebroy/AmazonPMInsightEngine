@@ -1,0 +1,174 @@
+{
+  "name": "Create data",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e72cae70-77a7-4fbf-b8b9-a77eefd01272",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a synthetic customer feedback data generator used for creating datasets for analytics and machine learning training.\n",
+              "role": "model"
+            },
+            {
+              "content": "Task:\nGenerate at least 100 records of realistic customer feedback.\n\nOutput Requirements:\n- Output MUST be valid JSON.\n- Return a JSON array of objects.\n- Each object must contain exactly two fields:\n  - \"source\"\n  - \"feedback\"\n- Do not include explanations, comments, or text outside the JSON.\n\nField Rules:\n- \"source\" must be one of the following values only:\n  - \"review\"\n  - \"support_ticket\"\n  - \"nps\"\n\n- \"feedback\" must be a short realistic customer feedback sentence related to:\n  - checkout issues\n  - payment failures\n  - login problems\n  - app crashes\n  - slow performance\n  - pricing confusion\n  - subscription issues\n  - UI/UX problems\n  - bugs\n  - account access issues\n\nStyle Rules:\n- Keep feedback between 5–12 words.\n- Ensure high variation in feedback.\n- Avoid repeating the same sentences.\n\nOutput Format Example:\n\n[\n  {\n    \"source\": \"review\",\n    \"feedback\": \"Payment fails every time I try to checkout\"\n  },\n  {\n    \"source\": \"review\",\n    \"feedback\": \"App crashes when I log in\"\n  },\n  {\n    \"source\": \"support_ticket\",\n    \"feedback\": \"Customer unable to complete purchase\"\n  },\n  {\n    \"source\": \"review\",\n    \"feedback\": \"Pricing page is confusing\"\n  },\n  {\n    \"source\": \"nps\",\n    \"feedback\": \"Checkout process is too slow\"\n  }\n]\n\nNow generate at least 100 records following this structure."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "defa6fd1-881d-4144-94c3-ae6a7909d0bd",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wcQQROhy6IK6kvCK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "3fc4f1c5-e4db-4596-aa9e-d3e9a52742fe",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.content.parts[0].text\n\nconst data = JSON.parse(text);\n  return data;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        0
+      ],
+      "id": "ac4b9d14-a15d-49f1-9a33-45442fb807e7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "name": "={{ \"Input_\" + $now.format(\"yyyyMMddHHmmss\") +\".csv\"}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1BBcANgsretMlMzOAmz6AY4sVJyes_E3V",
+          "mode": "list",
+          "cachedResultName": "AmazonData",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1BBcANgsretMlMzOAmz6AY4sVJyes_E3V"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "5db62dd3-bdc7-4b59-b33e-39d089905fcb",
+      "name": "Upload file",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b3a3c181-7ab5-43bd-bd04-9a2f5a448f88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7e5f6e071db1c4ac57b4aa2f0b02f457c474b16d1a5999afaa804ba672aaab9"
+  },
+  "id": "6zQro8syiW6tgsuH",
+  "tags": []
+}

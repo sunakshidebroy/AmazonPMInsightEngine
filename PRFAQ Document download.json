@@ -1,0 +1,115 @@
+{
+  "name": "PRFAQ Document download",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "prfaqdocument",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "58449bfb-f1cf-480d-af51-75c17cd94fcd",
+      "name": "Webhook",
+      "webhookId": "d081ad8a-428e-4814-a405-0dbc2148bff2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1_ykd1j8aeQQR8vst8SAb52CdTiyW61RK",
+          "mode": "list",
+          "cachedResultName": "Amazon_CX_Insights_Report_Q1_2026.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1_ykd1j8aeQQR8vst8SAb52CdTiyW61RK/view?usp=drivesdk"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "Amazon_CX_Insights_Report_Q1_2026.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f84b0a5f-bfd8-4b4a-b407-2ef24a2fdd32",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "6ae77cd7-4116-4538-b385-5fd37b559469",
+      "name": "Respond to Webhook",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "MaSmQKoNR0RV74x3",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "29325f72-bb4c-40f6-b104-02331dca45f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7e5f6e071db1c4ac57b4aa2f0b02f457c474b16d1a5999afaa804ba672aaab9"
+  },
+  "id": "jG3mFOGroj6RxYnp",
+  "tags": []
+}

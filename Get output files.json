@@ -1,0 +1,267 @@
+{
+  "name": "Get output files",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "getAmazonData",
+        "responseMode": "responseNode",
+        "options": {
+          "ignoreBots": false,
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "62e0f8ba-a071-4cd3-8b3f-5c2b7bb35072",
+      "name": "Webhook",
+      "webhookId": "861109fa-c04e-448f-bf6c-b1b55a1d5d36",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1RGYUqXIC9FsnZnKCxlGmzSyL8TW-KeA1",
+            "mode": "list",
+            "cachedResultName": "AmazonDataOutput",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1RGYUqXIC9FsnZnKCxlGmzSyL8TW-KeA1"
+          }
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "67a735d4-889d-4f11-b5c8-3d01b25de7b0",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "modifiedTime",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a9d62fdc-1dc6-4d42-9840-09d34dcfa88a",
+      "name": "Sort",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "limit": 1,
+        "filter": {
+          "driveId": {
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "13005a17-1c64-49ce-b952-d7452ddf65e2",
+      "name": "Search files and folders1",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "cb3868ab-f895-4141-97d2-8b4e968f2ad7",
+      "name": "Download file",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "8499c8ba-9f00-4ff9-bf8f-3fbc38df8264",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "8fd9a9f1-87de-4a16-a657-ec3d88b60c50",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders1": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "MaSmQKoNR0RV74x3",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "e21a7b14-bc6d-4246-bea3-418dc76e3aa8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7e5f6e071db1c4ac57b4aa2f0b02f457c474b16d1a5999afaa804ba672aaab9"
+  },
+  "id": "xa9D0fOTIScwbilW",
+  "tags": [
+    {
+      "updatedAt": "2026-03-08T11:54:18.455Z",
+      "createdAt": "2026-03-08T11:54:18.455Z",
+      "id": "5DJG41q68zFi1Btg",
+      "name": "Output webhook"
+    }
+  ]
+}

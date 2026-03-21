@@ -1,0 +1,378 @@
+{
+  "name": "Customer feedback analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "delimiter": ",",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -416,
+        -896
+      ],
+      "id": "84e3cf3c-7ffb-417c-be0a-5c11f0c4e1b2",
+      "name": "Extract from File",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c58fd663-0331-4c41-b320-913082d10412",
+              "name": "text",
+              "value": "={{ $json.feedback }}",
+              "type": "string"
+            },
+            {
+              "id": "fdc80ecb-f036-4e8c-b61c-81bf88d33260",
+              "name": "date",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "6e7ad7e3-95c7-433a-9533-a8da21222686",
+              "name": "rating",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "1b2bb7df-2464-47cf-8745-0058adacdc6b",
+              "name": "source_type",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        -896
+      ],
+      "id": "4652a00d-22b7-487b-a43b-13e0aea6fdc4",
+      "name": "Edit Fields",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const feedback = $('Extract from File').all()//$json.feedback_list;\n\nconst chunkSize = 5;\nlet chunks = [];\n\nfor (let i = 0; i < feedback.length; i += chunkSize) {\n  chunks.push({\n    feedback_chunk: feedback.slice(i, i + chunkSize)\n  });\n}\n\nreturn chunks.map(c => ({json: c}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -896
+      ],
+      "id": "eb94009f-ad39-498b-8924-8583ccf3e6fa",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = [];\nvar items = $input.all();\n\nconsole.log(items);\n\nfor (const item of items) {\n  const chunk = item.json.feedback_chunk;\n\n  for (const entry of chunk) {\n    const source = entry.json.source;\n    const feedback = entry.json.feedback;\n\n    result.push(`(${source})${feedback}`);\n  }\n}\n\nreturn [\n  {\n    json: {\n      text: result.join(\" \\n \")\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -896
+      ],
+      "id": "55929130-536f-4cdf-8dd2-e4ebbb12f014",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite-preview-09-2025",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite-preview-09-2025"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an Amazon-style Product Intelligence AI that performs product analytics on customer feedback.\n\nYour expertise combines:\n• Product analytics\n• Voice of customer analysis\n• Amazon-style product management\n• Theme clustering and taxonomy creation\n\nYou must analyze the provided feedback and produce structured product insights.\n\n--------------------------------\nSTEP 1 — Extract Issue Themes\n--------------------------------\nAnalyze all feedback items and extract product issue themes.\n\nDetermine severity based on tone and impact:\n\nH = Blocking core functionality\nM = Major friction\nL = Minor UX issue\n\nFor each theme identify:\n- theme\n- severity\n- example_quote\n\n--------------------------------\nSTEP 2 — Normalize Themes\n--------------------------------\nFrom the extracted themes:\n\n1. Merge duplicate or similar themes\n2. Produce a canonical theme taxonomy\n3. Limit to a maximum of 8 themes\n4. Calculate frequency counts\n5. Provide representative quotes\n\n--------------------------------\nSTEP 3 — Assign Product Ownership\n--------------------------------\nMap each theme to the most relevant product organization area.\n\nDepartments:\n\nCheckout Experience  \nIdentity / Login  \nPricing  \nPayments  \nDelivery  \nSubscriptions  \n\nAlso assign a **feature_area** that best represents the product component.\n\n--------------------------------\nSTEP 4 — Product Manager Insight Layer\n--------------------------------\nThink like an Amazon product manager.\n\nFor each canonical theme calculate:\n\n• frequency  \n• opportunity_score (impact × frequency estimate)  \n• risk level (HIGH / MEDIUM / LOW)  \n• department_owner  \n• feature_area  \n\nAlso produce insights:\n\n- hypothesis (what might be causing the issue)\n- evidence (signals from feedback)\n- suggested_action (what the product team should do)\n\n--------------------------------\nINPUT FEEDBACK\n--------------------------------\n\n{{ $json.text }}\n\n--------------------------------\nOUTPUT FORMAT\n--------------------------------\n\nReturn ONLY valid JSON in the following format:\n\n{\n\"themes\":[\n{\n\"canonical_theme\":\"\",\n\"frequency\":0,\n\"opportunity_score\":0,\n\"risk\":\"\",\n\"feature_area\":\"\",\n\"department_owner\":\"\",\n\"verbatims\":[\n\"\",\n\"\"\n],\n\"insight\":{\n\"hypothesis\":\"\",\n\"evidence\":\"\",\n\"suggested_action\":\"\"\n}\n}\n]\n}\n\nRules:\n- Maximum 8 themes\n- Use realistic frequencies\n- Quotes must come from feedback when possible\n- If data is limited you may create reasonable inferred examples\n- Do NOT return explanations\n- Output ONLY JSON"
+            },
+            {
+              "content": "You are a product analytics AI. Extract product problem themes.",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        -896
+      ],
+      "id": "4355d59e-476e-40b2-93ac-0fbf163dde6a",
+      "name": "LLM Theme Extraction",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wcQQROhy6IK6kvCK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        -896
+      ],
+      "id": "0ab9633f-8ad9-4f74-9f90-2af7c4f22170",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 6
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1BBcANgsretMlMzOAmz6AY4sVJyes_E3V",
+          "mode": "list",
+          "cachedResultName": "AmazonData",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1BBcANgsretMlMzOAmz6AY4sVJyes_E3V"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -896
+      ],
+      "id": "2fc2740b-2901-41ee-94f4-73356f864b99",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $('LLM Theme Extraction').item.json.content.parts[0].text }}",
+        "name": "={{ \"Output.json\" }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        -896
+      ],
+      "id": "fa01c7b8-c32e-4c43-8ee0-590e77a0b4ce",
+      "name": "Create file from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ \"Output_\" + $now.format('yyyyMMddHHmmss') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1RGYUqXIC9FsnZnKCxlGmzSyL8TW-KeA1",
+          "mode": "list",
+          "cachedResultName": "AmazonDataOutput",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1RGYUqXIC9FsnZnKCxlGmzSyL8TW-KeA1"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        832,
+        -896
+      ],
+      "id": "5eb10619-ef04-4285-86fd-11313a3757ff",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "t8jc4zAp87EZfAAc",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "LLM Theme Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Theme Extraction": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120,
+    "errorWorkflow": "MaSmQKoNR0RV74x3"
+  },
+  "versionId": "743a5b86-6548-451f-b62c-dd7a071d509f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7e5f6e071db1c4ac57b4aa2f0b02f457c474b16d1a5999afaa804ba672aaab9"
+  },
+  "id": "iekeEKUF9JuOH2p6",
+  "tags": [
+    {
+      "updatedAt": "2026-03-07T09:24:24.048Z",
+      "createdAt": "2026-03-07T09:24:24.048Z",
+      "id": "9vkMmphARZdPUcHD",
+      "name": "Work logic"
+    }
+  ]
+}
